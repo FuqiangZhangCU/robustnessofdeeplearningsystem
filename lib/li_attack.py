@@ -1,9 +1,5 @@
 ## li_attack.py -- attack a network optimizing for l_infinity distance
 ##
-## Copyright (C) 2016, Nicholas Carlini <nicholas@carlini.com>.
-##
-## This program is licenced under the BSD 2-Clause licence,
-## contained in the LICENCE file in this directory.
 
 import sys
 import tensorflow as tf
@@ -26,29 +22,7 @@ class CarliniLi:
                  initial_const = INITIAL_CONST, largest_const = LARGEST_CONST,
                  reduce_const = REDUCE_CONST, decrease_factor = DECREASE_FACTOR,
                  const_factor = CONST_FACTOR):
-        """
-        The L_infinity optimized attack. 
-
-        Returns adversarial examples for the supplied model.
-
-        targeted: True if we should perform a targetted attack, False otherwise.
-        learning_rate: The learning rate for the attack algorithm. Smaller values
-          produce better results but are slower to converge.
-        max_iterations: The maximum number of iterations. Larger values are more
-          accurate; setting too small will require a large learning rate and will
-          produce poor results.
-        abort_early: If true, allows early aborts if gradient descent gets stuck.
-        initial_const: The initial tradeoff-constant to use to tune the relative
-          importance of distance and confidence. Should be set to a very small
-          value (but positive).
-        largest_const: The largest constant to use until we report failure. Should
-          be set to a very large value.
-        reduce_const: If true, after each successful attack, make const smaller.
-        decrease_factor: Rate at which we should decrease tau, less than one.
-          Larger produces better quality results.
-        const_factor: The rate at which we should increase the constant, when the
-          previous constant failed. Should be greater than one, smaller is better.
-        """
+      
         self.model = model
         self.sess = sess
 
@@ -118,7 +92,7 @@ class CarliniLi:
             sess.run(init)
             while CONST < self.LARGEST_CONST:
                 # try solving for each value of the constant
-                print('try const', CONST)
+                #print('try const', CONST)
                 for step in range(self.MAX_ITERATIONS):
                     feed_dict={timg: imgs, 
                                tlab:labs, 
@@ -126,7 +100,8 @@ class CarliniLi:
                                simg: starts,
                                const: CONST}
                     if step%(self.MAX_ITERATIONS//10) == 0:
-                        print(step,sess.run((loss,loss1,loss2),feed_dict=feed_dict))
+                        #print(step)
+                        sess.run((loss,loss1,loss2),feed_dict=feed_dict)
 
                     # perform the update step
                     _, works = sess.run([train, loss], feed_dict=feed_dict)
@@ -148,10 +123,7 @@ class CarliniLi:
     
     def attack(self, imgs, targets):
         """
-        Perform the L_0 attack on the given images for the given targets.
-
-        If self.targeted is true, then the targets represents the target labels.
-        If self.targeted is false, then targets are the original class labels.
+        Perform the L_i attack on the given images for the given targets.
         """
         r = []
         for img,target in zip(imgs, targets):
@@ -185,7 +157,7 @@ class CarliniLi:
             if actualtau < tau:
                 tau = actualtau
     
-            print("Tau",tau)
+            #print("Tau",tau)
 
             prev = nimg
             tau *= self.DECREASE_FACTOR

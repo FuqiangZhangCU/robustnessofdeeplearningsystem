@@ -1,9 +1,5 @@
 ## l2_attack.py -- attack a network optimizing for l_2 distance
 ##
-## Copyright (C) 2016, Nicholas Carlini <nicholas@carlini.com>.
-##
-## This program is licenced under the BSD 2-Clause licence,
-## contained in the LICENCE file in this directory.
 
 import sys
 import tensorflow as tf
@@ -25,30 +21,7 @@ class CarliniL2:
                  initial_const = INITIAL_CONST,
                  boxmin = -0.5, boxmax = 0.5):
         """
-        The L_2 optimized attack. 
-
-        This attack is the most efficient and should be used as the primary 
-        attack to evaluate potential defenses.
-
-        Returns adversarial examples for the supplied model.
-
-        confidence: Confidence of adversarial examples: higher produces examples
-          that are farther away, but more strongly classified as adversarial.
-        batch_size: Number of attacks to run simultaneously.
-        targeted: True if we should perform a targetted attack, False otherwise.
-        learning_rate: The learning rate for the attack algorithm. Smaller values
-          produce better results but are slower to converge.
-        binary_search_steps: The number of times we perform binary search to
-          find the optimal tradeoff-constant between distance and confidence. 
-        max_iterations: The maximum number of iterations. Larger values are more
-          accurate; setting too small will require a large learning rate and will
-          produce poor results.
-        abort_early: If true, allows early aborts if gradient descent gets stuck.
-        initial_const: The initial tradeoff-constant to use to tune the relative
-          importance of distance and confidence. If binary_search_steps is large,
-          the initial constant is not important.
-        boxmin: Minimum pixel value (default -0.5).
-        boxmax: Maximum pixel value (default 0.5).
+        The L_2 optimized attack.
         """
 
         image_size, num_channels, num_labels = model.image_size, model.num_channels, model.num_labels
@@ -124,14 +97,11 @@ class CarliniL2:
     def attack(self, imgs, targets):
         """
         Perform the L_2 attack on the given images for the given targets.
-
-        If self.targeted is true, then the targets represents the target labels.
-        If self.targeted is false, then targets are the original class labels.
         """
         r = []
         print('go up to',len(imgs))
         for i in range(0,len(imgs),self.batch_size):
-            print('tick',i)
+            #print('tick',i)
             r.extend(self.attack_batch(imgs[i:i+self.batch_size], targets[i:i+self.batch_size]))
         return np.array(r)
 
@@ -195,7 +165,8 @@ class CarliniL2:
 
                 # print out the losses every 10%
                 if iteration%(self.MAX_ITERATIONS//10) == 0:
-                    print(iteration,self.sess.run((self.loss,self.loss1,self.loss2)))
+                    #print(iteration
+                    self.sess.run((self.loss,self.loss1,self.loss2))
 
                 # check if we should abort search if we're getting nowhere.
                 if self.ABORT_EARLY and iteration%(self.MAX_ITERATIONS//10) == 0:
